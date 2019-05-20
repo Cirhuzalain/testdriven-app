@@ -10,6 +10,7 @@ from project.api.models import User
 users_blueprint = Blueprint('users', __name__, template_folder='./templates')
 api = Api(users_blueprint)
 
+
 @users_blueprint.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -20,12 +21,14 @@ def index():
     users = User.query.all()
     return render_template('index.html', users=users)
 
+
 class UsersPing(Resource):
     def get(self):
         return {
-        'status': 'success',
-        'message': 'pong!'
-    }
+            'status': 'success',
+            'message': 'pong!'
+        }
+
 
 class Users(Resource):
     def get(self, user_id):
@@ -52,6 +55,7 @@ class Users(Resource):
         except ValueError:
             return response_object, 404
 
+
 class UsersList(Resource):
     def get(self):
         """Get all users"""
@@ -62,15 +66,15 @@ class UsersList(Resource):
             }
         }
         return response_object, 200
-        
+
     def post(self):
         post_data = request.get_json()
-        response_object = {
+        rep_obj = {
             'status': 'fail',
             'message': 'Invalid payload.'
         }
         if not post_data:
-            return response_object, 400
+            return rep_obj, 400
         username = post_data.get('username')
         email = post_data.get('email')
         try:
@@ -78,15 +82,16 @@ class UsersList(Resource):
             if not user:
                 db.session.add(User(username=username, email=email))
                 db.session.commit()
-                response_object['status'] = 'success'
-                response_object['message'] = f'{email} was added!'
-                return response_object, 201
+                rep_obj['status'] = 'success'
+                rep_obj['message'] = f'{email} was added!'
+                return rep_obj, 201
             else:
-                response_object['message'] = 'Sorry. That email already exists.'
-                return response_object, 400
+                rep_obj['message'] = 'Sorry. That email already exists.'
+                return rep_obj, 400
         except exc.IntegrityError:
             db.session.rollback()
-            return response_object, 400
+            return rep_obj, 400
+
 
 api.add_resource(UsersPing, '/users/ping')
 api.add_resource(UsersList, '/users')

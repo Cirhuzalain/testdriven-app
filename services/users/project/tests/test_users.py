@@ -8,11 +8,13 @@ from project import db
 from project.api.models import User
 from project.tests.base import BaseTestCase
 
+
 def add_user(username, email):
     user = User(username=username, email=email)
     db.session.add(user)
     db.session.commit()
     return user
+
 
 class TestUserService(BaseTestCase):
     """Tests for the Users Service."""
@@ -40,7 +42,7 @@ class TestUserService(BaseTestCase):
             self.assertEqual(response.status_code, 201)
             self.assertIn('michael@mherman.org was added!', data['message'])
             self.assertIn('success', data['status'])
-    
+
     def test_add_user_invalid_json(self):
         """Ensure error is thrown if the JSON object is empty."""
         with self.client:
@@ -56,7 +58,8 @@ class TestUserService(BaseTestCase):
 
     def test_add_user_invalid_json_keys(self):
         """
-            Ensure error is thrown if the JSON object does not have a username key.
+            Ensure error is thrown if the JSON object
+            does not have a username key.
         """
         with self.client:
             response = self.client.post(
