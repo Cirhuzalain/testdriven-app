@@ -3,9 +3,11 @@ from sqlalchemy import exc
 
 from flask import Blueprint, request, render_template
 from flask_restful import Resource, Api
+from project.api.utils import authenticate_restful
 
 from project import db
 from project.api.models import User
+from project.tests.utils import is_admin
 
 users_blueprint = Blueprint('users', __name__, template_folder='./templates')
 api = Api(users_blueprint)
@@ -58,6 +60,8 @@ class Users(Resource):
 
 
 class UsersList(Resource):
+    method_decorators = {'post': [authenticate_restful]}
+
     def get(self):
         """Get all users"""
         response_object = {
@@ -68,12 +72,15 @@ class UsersList(Resource):
         }
         return response_object, 200
 
-    def post(self):
+    def post(self, resp):
         post_data = request.get_json()
         rep_obj = {
             'status': 'fail',
             'message': 'Invalid payload.'
         }
+        if not is_admin(resp):
+            rep_obj['message'] = 'You do not have permission to do that.'
+            return rep_obj, 401
         if not post_data:
             return rep_obj, 400
         username = post_data.get('username')
